@@ -60,6 +60,13 @@ output is snapshot-tested against. The design lives in
 [docs/adr/](docs/adr/), and the behaviour it promises in
 [docs/spec/](docs/spec/).
 
+### Releasing
+
+Publish a GitHub release tagged `vX.Y.Z` with notes written by hand. The
+release workflow stamps that version over the `0.0.0` placeholders and
+publishes `arto-markdown` to crates.io and `@arto-app/markdown` to npm through
+trusted publishing. Below 1.0, a breaking change raises the minor version.
+
 ## License
 
 MIT. See [LICENSE](LICENSE).
