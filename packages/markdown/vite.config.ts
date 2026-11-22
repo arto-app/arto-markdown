@@ -4,13 +4,14 @@ import path from "path";
 
 import { primerThemesPlugin } from "./build/primer-themes.ts";
 import { scopeStylesheetPlugin } from "./build/scope-stylesheet.ts";
+import { bundleManifestPlugin } from "./build/manifest.ts";
 import { type BundleConsumer, syncBundlePlugin } from "./build/sync-bundle.ts";
 import { FRAME_SCRIPT } from "./src/html-embed-frame.ts";
 
 /**
  * The renderer crate's `frontend` feature hands a host the runtime and the
- * stylesheet for a document in someone else's page, and every consumer the
- * library bundles and the manifests that choose among them.
+ * stylesheet for a document in someone else's page, and the library bundles,
+ * with the manifest that names them for a host that loads them as files.
  */
 const bundleConsumers: BundleConsumer[] = [
   {
@@ -21,10 +22,9 @@ const bundleConsumers: BundleConsumer[] = [
       "page-mermaid.iife.js",
       "page-math.iife.js",
       "page-hljs-common.iife.js",
-      "page-hljs-common.txt",
       "page-hljs-all.iife.js",
-      "page-hljs-all.txt",
       "html-embed-frame.js",
+      "manifest.json",
     ],
   },
 ];
@@ -38,24 +38,42 @@ const bundleConsumers: BundleConsumer[] = [
  */
 const pageLibraries = [
   // The environment name is Vite's, which allows no dash; the entry name is
-  // the file's, on both sides of the build.
-  { environment: "pageMermaid", entry: "page-mermaid", global: "ArtoPageMermaid" },
-  { environment: "pageMath", entry: "page-math", global: "ArtoPageMath" },
+  // the file's, on both sides of the build; the library name is the one
+  // `arto_markdown::Library::name` gives it and the manifest lists it under.
+  {
+    environment: "pageMermaid",
+    entry: "page-mermaid",
+    global: "ArtoPageMermaid",
+    library: "mermaid",
+  },
+  { environment: "pageMath", entry: "page-math", global: "ArtoPageMath", library: "math" },
   // Two builds of one library, of which a page takes at most one: the
   // languages highlight.js calls common are a seventh of all of them, and
   // cover what nearly every document writes its code blocks in.
-  { environment: "pageHljsCommon", entry: "page-hljs-common", global: "ArtoPageHljsCommon" },
-  { environment: "pageHljsAll", entry: "page-hljs-all", global: "ArtoPageHljsAll" },
+  {
+    environment: "pageHljsCommon",
+    entry: "page-hljs-common",
+    global: "ArtoPageHljsCommon",
+    library: "hljs-common",
+  },
+  {
+    environment: "pageHljsAll",
+    entry: "page-hljs-all",
+    global: "ArtoPageHljsAll",
+    library: "hljs-all",
+  },
 ] as const;
 
 /**
  * Write down the languages a highlight.js bundle answers to, beside it.
  *
- * `arto_markdown::frontend` reads the body it is given to choose between the two builds,
+ * `arto_markdown::Libraries` reads the body it is given to choose between the two builds,
  * and the choice is only as good as its idea of what is in them — a name
  * hard-coded on the Rust side would go quietly wrong on the next highlight.js
  * release. So the list is build output, like the bundle it describes, and the
- * aliases are in it because a fence saying `sh` is asking for `bash`.
+ * aliases are in it because a fence saying `sh` is asking for `bash`. The crate
+ * keeps a copy in its sources (`just languages` refreshes it), so that it can
+ * choose without the bundles.
  */
 function hljsManifestPlugin(
   environment: string,
@@ -139,6 +157,16 @@ export default defineConfig(({ mode }) => {
       ),
       hljsManifestPlugin("pageHljsAll", () => import("highlight.js"), "page-hljs-all.txt"),
       htmlEmbedFramePlugin("embed"),
+      // After the last library's build, which is when every file it names is
+      // in the output.
+      bundleManifestPlugin(pageLibraries[pageLibraries.length - 1].environment, {
+        stylesheet: "embed.css",
+        runtime: "embed.iife.js",
+        htmlEmbedFrame: "html-embed-frame.js",
+        libraries: Object.fromEntries(
+          pageLibraries.map(({ entry, library }) => [library, `${entry}.iife.js`]),
+        ),
+      }),
       syncBundlePlugin(consumers, production),
     ],
     css: {

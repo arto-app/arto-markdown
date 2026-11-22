@@ -17,6 +17,7 @@ mod containers;
 mod errors;
 mod files;
 mod images;
+mod libraries;
 mod line_endings;
 mod options;
 mod reading_profile;

@@ -15,6 +15,18 @@ setup:
 assets: setup
     pnpm --filter @arto-app/markdown run build
 
+# Copy the languages each highlight.js bundle answers to into the crate's
+# sources, where the renderer reads them to tell a host which bundle a
+# document needs. Run it after a highlight.js update.
+languages: assets
+    cp packages/markdown/dist/page-hljs-common.txt crates/arto-markdown/src/libraries/hljs-common.txt
+    cp packages/markdown/dist/page-hljs-all.txt crates/arto-markdown/src/libraries/hljs-all.txt
+
+# The crate's copy of the language lists must be what the bundles answer to.
+languages-check: assets
+    diff -u crates/arto-markdown/src/libraries/hljs-common.txt packages/markdown/dist/page-hljs-common.txt
+    diff -u crates/arto-markdown/src/libraries/hljs-all.txt packages/markdown/dist/page-hljs-all.txt
+
 # Format every source.
 fmt: setup
     cargo fmt --all
@@ -96,4 +108,4 @@ workflows:
     zizmor --min-severity low --config .github/zizmor.yml .
 
 # Everything CI runs.
-ci: fmt-check check wasm test doc features deny machete package stamp-check docs workflows
+ci: fmt-check check wasm test languages-check doc features deny machete package stamp-check docs workflows

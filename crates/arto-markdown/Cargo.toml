@@ -21,10 +21,9 @@ include = [
   "assets/frontend/page-mermaid.iife.js",
   "assets/frontend/page-math.iife.js",
   "assets/frontend/page-hljs-common.iife.js",
-  "assets/frontend/page-hljs-common.txt",
   "assets/frontend/page-hljs-all.iife.js",
-  "assets/frontend/page-hljs-all.txt",
   "assets/frontend/html-embed-frame.js",
+  "assets/frontend/manifest.json",
 ]
 
 [dependencies]

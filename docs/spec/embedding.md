@@ -8,25 +8,61 @@ links and its theme stay its own.
 
 ## What a host is given
 
-`arto_markdown::frontend`, there when the crate's `frontend` feature is on,
-carries as Rust strings:
+Every render returns, with the HTML, the libraries that HTML needs
+(`RenderResult::libraries`): Pele, which draws Mermaid diagrams, KaTeX, and
+highlight.js in a common or a complete build. A document that draws no
+diagram needs no Pele, one that sets no formula needs no KaTeX, and the
+complete highlight.js is needed only for a language outside the common build.
+`Libraries::iter` yields them in the order to load them, each with the name
+the manifest below lists it under.
 
-- `STYLESHEET`, the styles of a rendered document;
-- `RUNTIME`, the script that draws it, published as `window.ArtoRenderer`;
-- the library bundles: Pele, which draws Mermaid diagrams, KaTeX, and
-  highlight.js in a common and a complete build;
-- `Libraries::for_fragment`, which names the bundles a rendered fragment
-  needs, and `Libraries::scripts`, which yields them in the order to load
-  them;
-- `HTML_EMBED_FRAME`, the script the runtime runs inside an HTML embed's
-  frame, and `draws_html_embed`, which says whether a fragment has one.
+The bundles themselves come in two forms, built from the same version as the
+renderer:
 
-The library bundles are the ones `arto page` and Quick Look embed, built
-from the same version as the renderer. `arto-frontend`, the crate they were
-published in before, hands a host the same module under its old name. A
-document that draws no diagram needs no Pele, one that
-sets no formula needs no KaTeX, and the complete highlight.js is needed only
-for a language outside the common build.
+- `arto_markdown::frontend`, there when the crate's `frontend` feature is on,
+  carries them as Rust strings: `STYLESHEET`, the styles of a rendered
+  document; `RUNTIME`, the script that draws it, published as
+  `window.ArtoRenderer`; the library bundles, which `Libraries::scripts`
+  yields in the order to load them; and `HTML_EMBED_FRAME`, the script the
+  runtime runs inside an HTML embed's frame, with `draws_html_embed`, which
+  says whether a fragment has one.
+- As files, for a host that loads them from its own package rather than
+  compiling them in, described by the manifest below.
+
+The library bundles are the ones `arto page` and Quick Look embed.
+`arto-frontend`, the crate they were published in before, hands a host the
+same module under its old name.
+
+## The manifest
+
+`manifest.json`, written by the build beside the bundles and shipped in the
+crate's package with them, names each file. It is a JSON object:
+
+```json
+{
+  "version": 1,
+  "stylesheet": { "file": "embed.css", "integrity": "sha256-…" },
+  "runtime": { "file": "embed.iife.js", "integrity": "sha256-…" },
+  "htmlEmbedFrame": { "file": "html-embed-frame.js", "integrity": "sha256-…" },
+  "libraries": {
+    "mermaid": { "file": "page-mermaid.iife.js", "integrity": "sha256-…" },
+    "math": { "file": "page-math.iife.js", "integrity": "sha256-…" },
+    "hljs-common": { "file": "page-hljs-common.iife.js", "integrity": "sha256-…" },
+    "hljs-all": { "file": "page-hljs-all.iife.js", "integrity": "sha256-…" }
+  }
+}
+```
+
+- `version` is the manifest's form, `1`. A form a host does not know is
+  one it cannot read.
+- `stylesheet`, `runtime` and `htmlEmbedFrame` are the files `STYLESHEET`,
+  `RUNTIME` and `HTML_EMBED_FRAME` hold.
+- `libraries` has one entry per library, under the name `Library::name` gives
+  it, so a render's libraries name their files.
+- `file` is the file's name, relative to the manifest.
+- `integrity` is `sha256-` and the base64 of the file's SHA-256: what a
+  `<script integrity>` and a `Content-Security-Policy` hash source take, and
+  what changes whenever the file does.
 
 ## Placing a document
 
@@ -39,18 +75,15 @@ The fragment `arto-markdown` renders goes inside a viewer element:
 ```
 
 The stylesheet is loaded, then the runtime, then the library bundles the
-fragment needs.
+render named.
 
 ```mermaid
 sequenceDiagram
     participant H as Host
     participant M as arto-markdown
-    participant F as arto_markdown::frontend
     H->>M: render the Markdown
-    M-->>H: the HTML fragment
-    H->>F: Libraries::for_fragment
-    F-->>H: the bundles it needs
-    Note over H: load STYLESHEET, RUNTIME,<br/>then those bundles
+    M-->>H: the HTML fragment and the libraries it needs
+    Note over H: load the stylesheet, the runtime,<br/>then those libraries' bundles
     H->>H: ArtoRenderer.render(viewer)
 ```
 
@@ -79,9 +112,9 @@ document costs what is on screen.
 Calling `render` again on the same viewer after the host replaced its content
 — a file changed on disk — draws the new content; what was drawn already is
 left as it is. A viewer taken out of the page is forgotten. The bundles the
-new content needs are the host's to load first: a fragment that gains its
-first diagram or formula needs `Libraries::for_fragment` asked again, and
-what a missing bundle would draw is left undrawn.
+new content needs are the host's to load first: the render of a document that
+gained its first diagram or formula names the library it now needs, and what
+a missing bundle would draw is left undrawn.
 
 `window.ArtoRenderer.setTheme(theme)` repaints every viewer rendered so far,
 and every one rendered after, in one of GitHub's themes, named as
