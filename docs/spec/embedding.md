@@ -184,9 +184,15 @@ image reports and what its URL is made from.
 Links, images and source positions stay as `arto-markdown` writes them: a
 document link is a `span.md-link` with its `data-md-link`, a block carries its
 `data-source-range`, and images resolved with `ImageResolution::Deferred` are
-for the host to serve. A document link pressed with the left or middle button
-calls `window.handleMarkdownLinkClick(path, button)`, which the host defines;
-the runtime does not. `path` is the link's target as the document wrote it —
+for the host to serve. Such an image's URL is the base URL the host gave, `/`
+and the id the render reported for it, followed by `.` and the file's
+extension when it has one; the host looks the id up without the extension.
+A document link pressed with the left or middle button
+calls `window.handleMarkdownLinkClick(path, button)` once, which the host
+defines; the runtime does not. It does so in a rendered viewer whether or not
+the page's `Content-Security-Policy` allows inline event handlers, so a host
+needs no `'unsafe-inline'` or `'unsafe-hashes'` for its links. `path` is the
+link's target as the document wrote it —
 relative to the document's own folder, fragment included — and resolving it
 is the host's. The runtime opens no viewer of its own for a diagram, a
 formula or an image; a link around one still behaves as a link.

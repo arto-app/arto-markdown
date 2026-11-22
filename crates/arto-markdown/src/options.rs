@@ -12,8 +12,10 @@ pub enum ImageResolution {
     /// Read the file and inline it as a `data:` URL.
     #[default]
     DataUrl,
-    /// Emit `{base_url}/{id}` and report which path each id stands for, for a
-    /// host that serves the bytes at that URL itself.
+    /// Emit `{base_url}/{id}`, followed by `.` and the file's extension when it
+    /// has one, and report which path each id stands for, for a host that
+    /// serves the bytes at that URL itself. The host looks the id up without
+    /// the extension.
     ///
     /// An id rather than the path itself, because a URL carrying an arbitrary
     /// path would have to survive percent-encoding and the shape of a Windows

@@ -102,9 +102,12 @@ pub(crate) fn local_link(href: &str) -> Option<LocalLink<'_>> {
 
 /// Whether the file a local link points at exists. The check is what the
 /// click handler will do with the same path, so a link that cannot open is
-/// shown as such before it is clicked.
+/// shown as such before it is clicked: the path as written, then
+/// percent-decoded (see [`crate::urls::percent_decoded`]).
 pub(crate) fn link_target_exists(base_dir: &Path, files: &dyn Files, path: &str) -> bool {
     files.stat(&base_dir.join(path)).is_some()
+        || crate::urls::percent_decoded(path)
+            .is_some_and(|decoded| files.stat(&base_dir.join(decoded.as_ref())).is_some())
 }
 
 /// Turn `el` into the `span.md-link` the app follows (see the HTML contract

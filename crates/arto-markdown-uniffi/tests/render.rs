@@ -299,7 +299,11 @@ fn a_document_the_parser_gives_up_on_is_a_parse_error() {
     )
     .expect_err("the parser gives up");
 
-    assert!(matches!(error, RenderError::Parse { .. }), "{error:?}");
+    let RenderError::Parse { reason } = error;
+    assert!(
+        reason.contains("nesting"),
+        "the parser's own words: {reason}"
+    );
 }
 
 /// One PNG at `/notes/pic.png`, answered as the host chooses to.

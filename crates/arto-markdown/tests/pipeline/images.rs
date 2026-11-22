@@ -61,6 +61,54 @@ fn a_deferred_image_leaves_the_bytes_out_and_names_the_file() {
     assert_eq!(rendered.html.matches(&url).count(), 2, "{}", rendered.html);
 }
 
+#[test]
+fn a_deferred_image_s_url_is_its_id_followed_by_the_file_s_extension() {
+    let dir = tempfile::TempDir::new().unwrap();
+    std::fs::write(dir.path().join("hero.png"), [0x89, 0x50, 0x4E, 0x47]).unwrap();
+    std::fs::write(dir.path().join("plain"), [0x89, 0x50, 0x4E, 0x47]).unwrap();
+
+    let rendered = render_to_html(
+        "![hero](./hero.png)\n\n![plain](./plain)\n",
+        dir.path().join("doc.md"),
+        &RenderOptions {
+            images: ImageResolution::Deferred {
+                base_url: "artoasset://localhost/img".to_string(),
+            },
+            ..Default::default()
+        },
+    )
+    .expect("renders");
+
+    let id = |name: &str| {
+        let path = dir.path().join(name).canonicalize().unwrap();
+        rendered
+            .images
+            .iter()
+            .find(|image| image.path == path)
+            .map(|image| image.id.clone())
+            .unwrap_or_else(|| panic!("{name} is deferred: {:?}", rendered.images))
+    };
+    // The id the host looks up carries no extension; the URL does, when the
+    // file has one.
+    assert!(!id("hero.png").contains('.'));
+    assert!(
+        rendered.html.contains(&format!(
+            r#"src="artoasset://localhost/img/{}.png""#,
+            id("hero.png")
+        )),
+        "{}",
+        rendered.html
+    );
+    assert!(
+        rendered.html.contains(&format!(
+            r#"src="artoasset://localhost/img/{}""#,
+            id("plain")
+        )),
+        "{}",
+        rendered.html
+    );
+}
+
 /// Whether an image can be shown decides the markup, so it is decided while
 /// the markup is written — the host serving the URL is far too late to drop a
 /// candidate the browser has already preferred.
