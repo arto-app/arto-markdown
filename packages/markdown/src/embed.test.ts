@@ -34,6 +34,24 @@ afterEach(async () => {
 });
 
 describe("render", () => {
+  test("hands a pressed document link to the host exactly once", () => {
+    // The link as the renderer writes it, inline handler included: whether
+    // the page runs that handler or its policy blocks it, the host hears of
+    // the press once.
+    const clicked = vi.fn();
+    vi.stubGlobal("handleMarkdownLinkClick", clicked);
+    const element = viewer(
+      '<p><span data-md-link="./other.md" class="md-link" onmousedown="if(event.button===0||event.button===1){event.preventDefault();window.handleMarkdownLinkClick(this.dataset.mdLink,event.button)}">there</span></p>',
+    );
+
+    embed.render(element);
+    element
+      .querySelector(".md-link")!
+      .dispatchEvent(new MouseEvent("mousedown", { button: 0, bubbles: true, cancelable: true }));
+
+    expect(clicked).toHaveBeenCalledExactlyOnceWith("./other.md", 0);
+  });
+
   test("names the current theme on the element it is given", async () => {
     await embed.setTheme("dark_dimmed");
     const element = viewer("<p>hi</p>");

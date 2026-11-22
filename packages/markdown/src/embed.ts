@@ -17,6 +17,7 @@
 import "../style/embed.css";
 
 import * as codeCopy from "./code-copy";
+import { followDocumentLinks } from "./document-links";
 import * as htmlEmbedRenderer from "./html-embed-renderer";
 import * as mathRenderer from "./math-renderer";
 import * as mermaidRenderer from "./mermaid-renderer";
@@ -60,6 +61,7 @@ export function render(viewer: Element): void {
   viewers.add(viewer);
   viewer.classList.add(VIEWER);
   viewer.setAttribute("data-theme", theme);
+  followDocumentLinks(viewer);
   draw(viewer);
 }
 
