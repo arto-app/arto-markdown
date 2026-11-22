@@ -1,7 +1,25 @@
 {
   "name": "@arto-app/markdown",
-  "private": true,
+  "version": "0.0.0",
+  "description": "The frontend that draws arto-markdown's HTML in any page: diagrams, math, HTML embeds and the colours of code",
+  "license": "MIT",
+  "homepage": "https://github.com/arto-app/arto-markdown",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/arto-app/arto-markdown.git",
+    "directory": "packages/markdown"
+  },
   "type": "module",
+  "files": [
+    "src/**/*.ts",
+    "src/**/*.json",
+    "!src/**/*.test.ts",
+    "style/**/*.css",
+    "style/generated/primer-themes.css"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
   "exports": {
     "./code-copy": "./src/code-copy.ts",
     "./html-embed-renderer": "./src/html-embed-renderer.ts",
