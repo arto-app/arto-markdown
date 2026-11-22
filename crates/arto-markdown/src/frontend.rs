@@ -127,6 +127,51 @@ mod tests {
     }
 
     #[test]
+    fn test_the_manifest_describes_the_bundles_compiled_in() {
+        use base64::Engine as _;
+        use sha2::Digest as _;
+
+        let manifest: serde_json::Value =
+            serde_json::from_str(include_str!("../assets/frontend/manifest.json"))
+                .expect("the manifest is JSON");
+        let integrity = |content: &str| {
+            let digest = sha2::Sha256::digest(content.as_bytes());
+            format!(
+                "sha256-{}",
+                base64::engine::general_purpose::STANDARD.encode(digest)
+            )
+        };
+        let described = |entry: &serde_json::Value| entry["integrity"].as_str().map(str::to_owned);
+
+        assert_eq!(manifest["version"], 1);
+        assert_eq!(
+            described(&manifest["stylesheet"]),
+            Some(integrity(STYLESHEET))
+        );
+        assert_eq!(described(&manifest["runtime"]), Some(integrity(RUNTIME)));
+        assert_eq!(
+            described(&manifest["htmlEmbedFrame"]),
+            Some(integrity(HTML_EMBED_FRAME))
+        );
+        for library in [
+            Library::Mermaid,
+            Library::Math,
+            Library::HljsCommon,
+            Library::HljsAll,
+        ] {
+            assert_eq!(
+                described(&manifest["libraries"][library.name()]),
+                Some(integrity(library.script())),
+                "{library:?}"
+            );
+        }
+        assert_eq!(
+            manifest["libraries"].as_object().map(|names| names.len()),
+            Some(4)
+        );
+    }
+
+    #[test]
     fn test_the_stylesheet_names_nothing_outside_the_viewer() {
         // A host owns its root, and may name a `data-theme` or a token of its
         // own there; the build confines the sheet so neither is touched.

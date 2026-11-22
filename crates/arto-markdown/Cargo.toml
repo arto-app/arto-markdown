@@ -23,6 +23,7 @@ include = [
   "assets/frontend/page-hljs-common.iife.js",
   "assets/frontend/page-hljs-all.iife.js",
   "assets/frontend/html-embed-frame.js",
+  "assets/frontend/manifest.json",
 ]
 
 [dependencies]
