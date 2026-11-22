@@ -1,7 +1,8 @@
 name: "Release"
 
 # Publishing a GitHub release (tag `vX.Y.Z`, notes written by hand) publishes
-# the renderer at that version: `arto-markdown` to crates.io and
+# the renderer at that version: `arto-markdown` and its UniFFI bindings
+# `arto-markdown-uniffi` to crates.io, and
 # `@arto-app/markdown` to npm. Git holds `0.0.0` in both manifests; the tag
 # is stamped over it here, by the script `just stamp-check` runs on every
 # pull request.
@@ -54,13 +55,14 @@ jobs:
       - name: Authenticate with crates.io
         id: auth
         uses: rust-lang/crates-io-auth-action@v1
-      # Verified as `just package` verifies it on every pull request; this
-      # run matters for the stamped version. `--allow-dirty` because the
+      # Verified as `just package` verifies them on every pull request; this
+      # run matters for the stamped version. The renderer goes first, since
+      # the bindings name it at this version. `--allow-dirty` because the
       # stamp deliberately leaves the tree modified.
       - name: Publish to crates.io
         env:
           CARGO_REGISTRY_TOKEN: ${{ steps.auth.outputs.token }}
-        run: cargo publish -p arto-markdown --locked --allow-dirty
+        run: cargo publish -p arto-markdown -p arto-markdown-uniffi --locked --allow-dirty
 
   npm:
     runs-on: ubuntu-latest

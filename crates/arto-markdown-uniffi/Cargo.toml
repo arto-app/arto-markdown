@@ -1,0 +1,32 @@
+[package]
+name = "arto-markdown-uniffi"
+description = "arto-markdown's renderer as a UniFFI interface, for Swift and Kotlin bindings"
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+readme.workspace = true
+keywords = ["markdown", "uniffi", "swift", "kotlin", "renderer"]
+categories = ["text-processing"]
+
+[lib]
+# `staticlib` for an XCFramework, `cdylib` for Android and for generating the
+# bindings from the library, `lib` for the tests.
+crate-type = ["lib", "staticlib", "cdylib"]
+
+[[bin]]
+# The bindings generator at the version these bindings are built with, for the
+# apps that build them in: `cargo run --features cli --bin
+# uniffi-bindgen -- generate --library …`.
+name = "uniffi-bindgen"
+required-features = ["cli"]
+
+[features]
+cli = ["uniffi/cli"]
+
+[dependencies]
+arto-markdown.workspace = true
+thiserror.workspace = true
+uniffi = "0.32.2"
