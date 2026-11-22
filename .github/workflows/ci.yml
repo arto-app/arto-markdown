@@ -1,0 +1,87 @@
+name: "CI"
+
+# `just ci` is the quality gate, locally and here. `ok` at the bottom is the
+# single job to require in branch protection: it fails if anything it depends
+# on failed.
+
+on:
+  push:
+    branches:
+      - "main"
+  pull_request:
+  workflow_dispatch:
+
+# A new push to the same ref supersedes the run in flight. Only for pull
+# requests: a run on main finishes, so its caches are saved.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions:
+  contents: read
+
+jobs:
+  # The whole gate, in the devShell the flake describes, so a failure here is
+  # reproduced by the same recipe on a developer's machine.
+  ci:
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: nixbuild/nix-quick-install-action@v35
+      # Loads the devShell into the job, so the steps below run the same
+      # commands as on Windows, with no `nix develop -c` in front of them.
+      - uses: nicknovitski/nix-develop@v1
+      - uses: Swatinem/rust-cache@v2
+      - run: just ci
+
+  # Windows has no Nix, so the tools come from their own installers. It runs
+  # the tests, not the whole gate: formatting, lints, advisories and the
+  # documentation checks do not depend on the OS, and the legs above run them.
+  windows:
+    runs-on: windows-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      # The action brings rustup; the toolchain itself is the one
+      # rust-toolchain.toml pins, the same one the devShell carries.
+      - uses: dtolnay/rust-toolchain@stable
+      - run: rustup toolchain install
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+      # pnpm at the version the root package.json's packageManager names.
+      - uses: pnpm/action-setup@v6
+      - uses: taiki-e/install-action@v2
+        with:
+          tool: just
+      - uses: Swatinem/rust-cache@v2
+      - run: just test
+
+  ok:
+    if: always()
+    needs: [ci, windows]
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Fail if a required job did not succeed
+        env:
+          RESULTS: ${{ join(needs.*.result, ' ') }}
+        run: |
+          for result in $RESULTS; do
+            if [ "$result" != "success" ]; then
+              echo "a required job ended with: $result" >&2
+              exit 1
+            fi
+          done

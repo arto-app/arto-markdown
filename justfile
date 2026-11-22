@@ -90,4 +90,4 @@ workflows:
     zizmor --min-severity low --config .github/zizmor.yml .
 
 # Everything CI runs.
-ci: fmt-check check wasm test doc features deny machete package stamp-check docs
+ci: fmt-check check wasm test doc features deny machete package stamp-check docs workflows
