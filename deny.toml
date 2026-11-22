@@ -1,0 +1,38 @@
+# cargo-deny policy for `just deny`.
+# https://embarkstudios.github.io/cargo-deny/checks/index.html
+
+[graph]
+all-features = true
+
+[advisories]
+version = 2
+yanked = "deny"
+# Unmaintained crates nothing here can replace directly. Drop an entry once
+# the named dependency moves off the crate.
+ignore = [
+  { id = "RUSTSEC-2024-0449", reason = "unsafe-libyaml via serde_yaml_ng (the front matter); its latest release still uses it" },
+]
+
+[licenses]
+version = 2
+# Permissive licenses only; anything else fails until it is reviewed and
+# added here deliberately.
+allow = [
+  "Apache-2.0",
+  "BSD-3-Clause",
+  "MIT",
+  "MPL-2.0",
+  "Unicode-3.0",
+  "Zlib",
+]
+confidence-threshold = 0.9
+
+[bans]
+multiple-versions = "warn"
+wildcards = "allow"
+
+[sources]
+unknown-registry = "deny"
+# Every dependency comes from crates.io; a git source in the lockfile means
+# a fork someone has to keep following, so it has to be argued for here.
+unknown-git = "deny"
