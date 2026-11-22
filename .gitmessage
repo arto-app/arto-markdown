@@ -1,0 +1,18 @@
+# **Scoped Commits**
+#
+# <scope>: <description>
+#
+# <why this change is needed>
+#
+# The scope names where the change is: markdown, frontend, samples, docs,
+# adr, spec, agents, build, ci, nix, deps — the table in AGENTS.md says what
+# each covers. Several scopes are joined with ", "; a change across the tree
+# is "treewide".
+#
+# The description is lower case, without a trailing period, within 72
+# characters. The body says why; a breaking change ends with a
+# "BREAKING CHANGE:" trailer.
+#
+# **Install**
+#
+#   git config commit.template .gitmessage
