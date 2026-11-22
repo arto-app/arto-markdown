@@ -8,6 +8,11 @@
 //! libraries the HTML needs come back by the names the build's
 //! `manifest.json` lists the bundles under. The bundles themselves are files
 //! the `arto-markdown` crate's package carries.
+//!
+//! The bindings are generated from a built library (`uniffi-bindgen generate
+//! --library`), which reads the interface from metadata the library carries.
+//! A build with `strip = true` drops that metadata, so generate them from an
+//! unstripped build and strip the one the app ships.
 
 use arto_markdown::{ImageResolution, Renderer};
 use std::path::{Path, PathBuf};
@@ -237,16 +242,19 @@ impl From<arto_markdown::RenderResult> for RenderResult {
 /// Why a document could not be rendered.
 #[derive(Debug, thiserror::Error, uniffi::Error)]
 pub enum RenderError {
-    /// The Markdown parser gave up on the document.
-    #[error("failed to parse Markdown: {message}")]
-    Parse { message: String },
+    /// The Markdown parser gave up on the document, for `reason`.
+    ///
+    /// Not `message`: Kotlin makes this an exception, and a field of that
+    /// name redeclares `Throwable.message`, so the bindings would not compile.
+    #[error("failed to parse Markdown: {reason}")]
+    Parse { reason: String },
 }
 
 impl From<arto_markdown::RenderError> for RenderError {
     fn from(error: arto_markdown::RenderError) -> Self {
-        let message = std::error::Error::source(&error)
+        let reason = std::error::Error::source(&error)
             .map_or_else(|| error.to_string(), ToString::to_string);
-        Self::Parse { message }
+        Self::Parse { reason }
     }
 }
 
