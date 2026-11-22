@@ -30,8 +30,10 @@ export interface RenderOptions {
   headingPermalinks?: boolean;
   rawHtml?: "allow" | "filter" | "escape";
   /**
-   * Leave local images to the host, written as `{deferredImageBaseUrl}/{id}`
-   * and listed in `images`, instead of inlining them as data URLs.
+   * Leave local images to the host, written as `{deferredImageBaseUrl}/{id}` —
+   * followed by `.` and the file's extension when it has one, which the host
+   * ignores when it looks the id up — and listed in `images`, instead of
+   * inlining them as data URLs.
    */
   deferredImageBaseUrl?: string;
 }

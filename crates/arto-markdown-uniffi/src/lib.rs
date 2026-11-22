@@ -63,8 +63,10 @@ pub struct RenderOptions {
     #[uniffi(default = None)]
     pub raw_html: Option<RawHtml>,
     /// Leave local images to the host, written as
-    /// `{deferred_image_base_url}/{id}` and listed in
-    /// [`RenderResult::images`], instead of inlining them as data URLs.
+    /// `{deferred_image_base_url}/{id}` — followed by `.` and the file's
+    /// extension when it has one, which the host ignores when it looks the id
+    /// up — and listed in [`RenderResult::images`], instead of inlining them
+    /// as data URLs.
     #[uniffi(default = None)]
     pub deferred_image_base_url: Option<String>,
 }
