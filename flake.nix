@@ -51,6 +51,10 @@
               pkgs.nodejs_24
               pkgs.pnpm_10
 
+              # `just wasm-package`. The version has to be the one
+              # crates/arto-markdown-wasm pins wasm-bindgen to.
+              pkgs.wasm-bindgen-cli_0_2_130
+
               pkgs.nixfmt # `just fmt`, `just fmt-check`
               pkgs.cargo-hack # `just features`
               pkgs.cargo-deny # `just deny`

@@ -23,20 +23,29 @@ my $pack = decode_json(scalar qx(npm pack --dry-run --json --ignore-scripts 2>/d
 die "npm pack failed\n" if $? != 0;
 my %packed = map { $_->{path} => 1 } @{ $pack->[0]{files} };
 
+# An export is a path, or an object of conditions (`types`, `default`) each
+# naming one.
+sub targets {
+    my ($export) = @_;
+    return ref $export eq 'HASH' ? map { targets($_) } values %$export : ($export);
+}
+
 my @failures;
 for my $key ( sort keys %{ $manifest->{exports} } ) {
-    ( my $target = $manifest->{exports}{$key} ) =~ s{^\./}{};
-    if ( $target =~ /\*/ ) {
-        ( my $prefix = $target ) =~ s/\*.*//;
-        push @failures, "export $key: nothing packed under $prefix"
-          unless grep { index( $_, $prefix ) == 0 } keys %packed;
-    }
-    else {
-        push @failures, "export $key: $target is not packed" unless $packed{$target};
+    for my $target ( sort map { s{^\./}{}r } targets( $manifest->{exports}{$key} ) ) {
+        if ( $target =~ /\*/ ) {
+            ( my $prefix = $target ) =~ s/\*.*//;
+            push @failures, "export $key: nothing packed under $prefix"
+              unless grep { index( $_, $prefix ) == 0 } keys %packed;
+        }
+        else {
+            push @failures, "export $key: $target is not packed" unless $packed{$target};
+        }
     }
 }
-push @failures, 'style/generated/primer-themes.css is not packed (run `just assets`)'
-  unless $packed{'style/generated/primer-themes.css'};
+# Build output the package carries without an export naming the file.
+push @failures, "$_ is not packed (run `just assets wasm-package`)"
+  for grep { !$packed{$_} } qw(style/generated/primer-themes.css dist/manifest.json);
 push @failures, map { "$_ is a test and is packed" } grep { /\.test\.ts$/ } sort keys %packed;
 
 if (@failures) {

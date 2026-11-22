@@ -65,7 +65,9 @@ jobs:
       - uses: pnpm/action-setup@v6
       - uses: taiki-e/install-action@v2
         with:
-          tool: just
+          # wasm-bindgen at the version crates/arto-markdown-wasm pins, for
+          # `just wasm-package`; the devShell has the same one.
+          tool: just,wasm-bindgen@0.2.130
       - uses: Swatinem/rust-cache@v2
       - run: just test
 

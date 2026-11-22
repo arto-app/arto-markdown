@@ -15,6 +15,12 @@ setup:
 assets: setup
     pnpm --filter @arto-app/markdown run build
 
+# Build the renderer for the browser into packages/markdown/wasm, which the
+# npm package publishes as its `./wasm` export.
+wasm-package:
+    cargo build -p arto-markdown-wasm --target wasm32-unknown-unknown --release
+    wasm-bindgen --target web --out-dir packages/markdown/wasm target/wasm32-unknown-unknown/release/arto_markdown_wasm.wasm
+
 # Copy the languages each highlight.js bundle answers to into the crate's
 # sources, where the renderer reads them to tell a host which bundle a
 # document needs. Run it after a highlight.js update.
@@ -46,17 +52,17 @@ _nixfmt *args:
     if command -v nixfmt >/dev/null; then nixfmt {{ args }} flake.nix; else echo "nixfmt not found; skipping flake.nix" >&2; fi
 
 # Lint with every warning as an error: clippy, then oxlint and tsc.
-check: assets
+check: assets wasm-package
     cargo clippy --workspace --all-targets --all-features -- -D warnings
     pnpm --recursive run check
 
 # The renderer is what a browser host runs, so it has to build for wasm32
 # with nothing in it that only the desktop platforms provide.
 wasm:
-    cargo clippy -p arto-markdown --target wasm32-unknown-unknown -- -D warnings
+    cargo clippy -p arto-markdown -p arto-markdown-wasm --target wasm32-unknown-unknown -- -D warnings
 
 # Run every test: the crate's (sample snapshots included) and the frontend's.
-test: assets
+test: assets wasm-package
     cargo test --workspace --all-targets --all-features
     cargo test --workspace --doc --all-features
     pnpm --recursive run test
@@ -88,7 +94,7 @@ package: assets
 
 # The npm package as `npm publish` would pack it: every export and the
 # generated theme stylesheet in it, no test in it.
-npm-package: assets
+npm-package: assets wasm-package
     perl scripts/check-npm-package.pl packages/markdown
 
 # Stamp a copy of the manifests the way a release does, so a placeholder the

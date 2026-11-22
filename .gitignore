@@ -5,3 +5,5 @@ node_modules/
 /.envrc
 .direnv/
 /.claude/worktrees/
+# Built by `just wasm-package`; published in the npm package, not tracked.
+/packages/markdown/wasm/

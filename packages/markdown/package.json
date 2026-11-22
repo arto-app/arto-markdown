@@ -15,7 +15,13 @@
     "src/**/*.json",
     "!src/**/*.test.ts",
     "style/**/*.css",
-    "style/generated/primer-themes.css"
+    "style/generated/primer-themes.css",
+    "wasm/arto_markdown_wasm.js",
+    "wasm/arto_markdown_wasm.d.ts",
+    "wasm/arto_markdown_wasm_bg.wasm",
+    "dist/*.js",
+    "dist/*.css",
+    "dist/manifest.json"
   ],
   "publishConfig": {
     "access": "public"
@@ -32,7 +38,13 @@
     "./syntax-highlighter": "./src/syntax-highlighter.ts",
     "./theme": "./src/theme.ts",
     "./viewport-queue": "./src/viewport-queue.ts",
-    "./style/*": "./style/*"
+    "./style/*": "./style/*",
+    "./wasm": {
+      "types": "./wasm/arto_markdown_wasm.d.ts",
+      "default": "./wasm/arto_markdown_wasm.js"
+    },
+    "./wasm/arto_markdown_wasm_bg.wasm": "./wasm/arto_markdown_wasm_bg.wasm",
+    "./bundles/*": "./dist/*"
   },
   "scripts": {
     "watch": "vite build --mode development --watch --minify false",
