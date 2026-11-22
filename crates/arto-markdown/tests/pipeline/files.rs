@@ -157,3 +157,54 @@ fn an_image_the_host_does_not_hold_is_left_as_written() {
 
     assert!(html.contains(r#"src="./hero.png""#), "{html}");
 }
+
+/// Markdown asks for a space in a link target to be written `%20`, and the
+/// app opens `my%20notes.md` as `my notes.md`; a link is shown as missing
+/// only when the app could not open it either.
+#[test]
+fn a_percent_encoded_link_names_the_file_it_decodes_to() {
+    let files = MemoryFiles::new(&[
+        ("/notes/my notes.md", b"# Notes"),
+        ("/notes/100%20.md", b"# Literally"),
+    ]);
+
+    let html = Renderer::new(&files)
+        .render_to_html(
+            "[spaced](./my%20notes.md) [literal](./100%20.md) [gone](./no%20such.md)\n",
+            "/notes/doc.md",
+            &RenderOptions::default(),
+        )
+        .expect("renders")
+        .html;
+
+    for (link, class) in [
+        ("./my%20notes.md", "md-link"),
+        // A file whose name really holds `%20` is found as written.
+        ("./100%20.md", "md-link"),
+        ("./no%20such.md", "md-link md-link-missing"),
+    ] {
+        assert!(
+            has_element(&html, "span", &[("data-md-link", link), ("class", class)]),
+            "{link}: {html}"
+        );
+    }
+}
+
+#[test]
+fn a_percent_encoded_image_is_drawn_from_the_file_it_decodes_to() {
+    let files = MemoryFiles::new(&[("/notes/my picture.png", &[0x89, 0x50, 0x4e, 0x47])]);
+
+    let html = Renderer::new(&files)
+        .render_to_html(
+            "![pic](./my%20picture.png)\n",
+            "/notes/doc.md",
+            &RenderOptions::default(),
+        )
+        .expect("renders")
+        .html;
+
+    assert!(
+        html.contains(r#"src="data:image/png;base64,iVBORw==""#),
+        "{html}"
+    );
+}

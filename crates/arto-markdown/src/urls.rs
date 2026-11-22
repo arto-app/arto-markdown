@@ -69,6 +69,20 @@ pub(crate) fn has_foreign_scheme(href: &str) -> bool {
         && !scheme.eq_ignore_ascii_case("file")
 }
 
+/// `written` percent-decoded, or `None` when decoding changes nothing or does
+/// not give UTF-8.
+///
+/// A target is looked for as written first and decoded second: Markdown asks
+/// for a space in a link to be written `%20`, so `my%20notes.md` names
+/// `my notes.md`, and Arto opens it that way, while a file whose name really
+/// holds `%20` is still found by the first try.
+pub(crate) fn percent_decoded(written: &str) -> Option<std::borrow::Cow<'_, str>> {
+    let decoded = percent_encoding::percent_decode_str(written)
+        .decode_utf8()
+        .ok()?;
+    (decoded != written).then_some(decoded)
+}
+
 /// Whether an image reference is something the page loads as written, with
 /// no file to look for.
 pub(crate) fn needs_no_resolution(src: &str) -> bool {

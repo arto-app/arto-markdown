@@ -107,12 +107,19 @@ fn resolve_local_image(src: &str, base_dir: &Path, files: &dyn Files) -> Option<
             }
         })
     } else {
-        let path = Path::new(src);
-        if path.is_absolute() {
-            path.to_path_buf()
-        } else {
-            base_dir.join(path)
-        }
+        // A plain path is looked for as written and then percent-decoded, as
+        // a link's target is (`urls::percent_decoded`).
+        let at = |src: &str| {
+            let path = Path::new(src);
+            if path.is_absolute() {
+                path.to_path_buf()
+            } else {
+                base_dir.join(path)
+            }
+        };
+        return files.stat(&at(src)).or_else(|| {
+            crate::urls::percent_decoded(src).and_then(|decoded| files.stat(&at(&decoded)))
+        });
     };
 
     files.stat(&absolute_path)
