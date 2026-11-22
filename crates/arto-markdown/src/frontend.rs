@@ -181,6 +181,27 @@ mod tests {
     }
 
     #[test]
+    fn test_the_viewer_paints_its_text_as_well_as_its_background() {
+        // The host's page has a text colour of its own, black by default,
+        // which a dark theme's background would otherwise sit under.
+        let painted = STYLESHEET
+            .split('}')
+            .filter_map(|rule| rule.split_once('{'))
+            .find(|(selector, body)| {
+                selector.trim_end() == ".markdown-viewer" && body.contains("--content-bg")
+            })
+            .map(|(_, body)| body)
+            .expect("a rule paints the viewer's background");
+
+        assert!(
+            painted
+                .split(';')
+                .any(|declaration| declaration.trim() == "color:var(--text-color)"),
+            "{painted}"
+        );
+    }
+
+    #[test]
     fn test_the_runtime_is_published_where_the_libraries_look_for_it() {
         // Each library bundle registers itself on `window.ArtoRenderer`.
         assert!(RUNTIME.contains("ArtoRenderer"));

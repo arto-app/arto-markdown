@@ -3,6 +3,10 @@
   height: auto;
   padding: 24px;
   background-color: var(--content-bg);
+  /* Primer's Markdown stylesheet leaves the text colour to the surrounding
+     page, and a host's page has a colour of its own that the theme's
+     background would sit under. */
+  color: var(--text-color);
 
   &.full-width .markdown-body {
     max-width: none;
