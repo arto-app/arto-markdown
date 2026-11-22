@@ -41,6 +41,11 @@ const { html, libraries } = render("# Hello\n", "/docs/hello.md");
 // `manifest.json` there lists, in the order to load them.
 ```
 
+`arto-markdown-uniffi` is the renderer as a [UniFFI](https://mozilla.github.io/uniffi-rs/)
+interface, for an app that calls it from Swift or Kotlin and builds it in. It
+carries `uniffi-bindgen` at the version the bindings are made with
+(`cargo run --features cli --bin uniffi-bindgen`).
+
 `arto-frontend`, the crate the bundles were published in before, stays at
 0.47.1 and is not released any more; depend on `arto-markdown` with the
 `frontend` feature instead.

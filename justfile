@@ -84,12 +84,13 @@ deny:
 machete:
     cargo machete
 
-# The crate packaged and built from its package alone, as `cargo publish`
-# verifies it on release: a file an `include_str!` reads but the `include`
+# The crates packaged and built from their packages alone, as `cargo publish`
+# verifies them on release (the bindings against the renderer's package, not
+# its sources): a file an `include_str!` reads but the `include`
 # list leaves out fails here, not after a release is out. `--allow-dirty`
 # because under jj the working copy is always ahead of git's HEAD.
 package: assets
-    cargo package -p arto-markdown --allow-dirty
+    cargo package -p arto-markdown -p arto-markdown-uniffi --allow-dirty
     just npm-package
 
 # The npm package as `npm publish` would pack it: every export and the

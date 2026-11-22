@@ -20,6 +20,9 @@ readme = "README.md"
 # Versions for the dependencies the members name with `<name>.workspace =
 # true`, kept in one place so a second member cannot drift from the first.
 [workspace.dependencies]
+# The renderer, for the bindings beside it. The version is the placeholder the
+# release stamps, so a published binding names the renderer of its release.
+arto-markdown = { path = "crates/arto-markdown", version = "0.0.0" }
 base64 = "0.23.1"
 html-escape = "0.3.0"
 indoc = "2.0.7"

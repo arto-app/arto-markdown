@@ -52,6 +52,7 @@ CI runs the same recipe.
 | --- | --- |
 | `crates/arto-markdown/` | The renderer: Markdown → HTML, and (feature `frontend`) the frontend's bundles as Rust strings |
 | `crates/arto-markdown-wasm/` | The renderer for the browser: wasm-bindgen bindings, built into `packages/markdown/wasm/` by `just wasm-package` and published in the npm package, not as a crate |
+| `crates/arto-markdown-uniffi/` | The renderer as a UniFFI interface, published to crates.io for the iOS and Android apps, which generate their Swift and Kotlin bindings from it and build it in |
 | `packages/markdown/` | `@arto-app/markdown`: the frontend's TypeScript and CSS, built by Vite into the crate's `assets/frontend/`; with the WebAssembly renderer when published |
 | `samples/` | Sample documents whose HTML is snapshot-tested |
 | `docs/` | concept, ADRs, and specs |
@@ -91,6 +92,7 @@ The history carried over from Arto keeps its own references:
 | --- | --- |
 | `markdown` | `crates/arto-markdown/` |
 | `wasm` | `crates/arto-markdown-wasm/` |
+| `uniffi` | `crates/arto-markdown-uniffi/` |
 | `frontend` | `packages/markdown/`, `crates/arto-markdown/src/frontend.rs` |
 | `samples` | `samples/` |
 | `docs` | `README.md`, `LICENSE`, `docs/concept.md` |

@@ -11,6 +11,7 @@ yanked = "deny"
 # the named dependency moves off the crate.
 ignore = [
   { id = "RUSTSEC-2024-0449", reason = "unsafe-libyaml via serde_yaml_ng (the front matter); its latest release still uses it" },
+  { id = "RUSTSEC-2026-0374", reason = "basic-toml via askama via uniffi_bindgen, only in the bindings generator (arto-markdown-uniffi's `cli` feature), never in the library an app links; uniffi's latest release still uses it" },
 ]
 
 [licenses]

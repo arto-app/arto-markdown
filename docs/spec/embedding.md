@@ -48,6 +48,15 @@ names exists: a link to another document is marked missing and a local image
 is not drawn. Images are inlined unless the options name the URL the host
 serves them under.
 
+## Through UniFFI
+
+`arto-markdown-uniffi` offers the same render functions to the languages
+UniFFI generates bindings for, Swift and Kotlin among them, with the same
+arguments and the same result. An option left out keeps the renderer's
+default. The files are the host's implementation of the `Files` interface;
+without one, no file a document names exists. A document the parser gives up
+on is a `RenderError`.
+
 The library bundles are the ones `arto page` and Quick Look embed.
 `arto-frontend`, the crate they were published in before, hands a host the
 same module under its old name.
