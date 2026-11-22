@@ -72,11 +72,17 @@ machete:
 # because under jj the working copy is always ahead of git's HEAD.
 package: assets
     cargo package -p arto-markdown --allow-dirty
+    just npm-package
+
+# The npm package as `npm publish` would pack it: every export and the
+# generated theme stylesheet in it, no test in it.
+npm-package: assets
+    perl scripts/check-npm-package.pl packages/markdown
 
 # Stamp a copy of the manifests the way a release does, so a placeholder the
 # release workflow would no longer find fails here, on every OS.
 stamp-check:
-    tmp=$(mktemp -d) && cp Cargo.toml Cargo.lock "$tmp" && perl scripts/stamp-version.pl 0.0.0-ci "$tmp"
+    tmp=$(mktemp -d) && mkdir -p "$tmp/packages/markdown" && cp Cargo.toml Cargo.lock "$tmp" && cp packages/markdown/package.json "$tmp/packages/markdown" && perl scripts/stamp-version.pl 0.0.0-ci "$tmp"
 
 # Links in Markdown files (offline, see lychee.toml) and repository paths
 # named in documentation.
