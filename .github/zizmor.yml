@@ -1,0 +1,10 @@
+# zizmor policy for `just workflows`.
+# https://docs.zizmor.sh/configuration/
+rules:
+  unpinned-uses:
+    config:
+      policies:
+        # Actions are pinned to release tags, which Dependabot keeps current;
+        # a hash pin would need a comment per line to stay reviewable and
+        # buys little for the first-party and widely used actions in use.
+        "*": ref-pin

@@ -1,0 +1,49 @@
+# Keeps Cargo, pnpm and GitHub Actions dependencies moving without a manual
+# sweep. Nix flake inputs are not covered by Dependabot.
+#
+# Minor and patch bumps are grouped into one PR per ecosystem so the review
+# cost stays flat; major bumps stay separate because each one needs its own
+# API check. A bump that changes a bundle or the HTML shows up as a snapshot
+# diff, which is reviewed rather than accepted.
+#
+# Commit messages follow the Scoped Commits convention in AGENTS.md:
+# `deps:` for the packages, `ci:` for the workflows.
+version: 2
+updates:
+  - package-ecosystem: cargo
+    directory: /
+    schedule:
+      interval: weekly
+    # Adopt a new release only after it has been public for a week, so a
+    # compromised or yanked release is usually caught upstream first.
+    cooldown:
+      default-days: 7
+    commit-message:
+      prefix: deps
+    groups:
+      cargo-minor-and-patch:
+        update-types: [minor, patch]
+
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 7
+    commit-message:
+      prefix: deps
+    groups:
+      npm-minor-and-patch:
+        update-types: [minor, patch]
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 7
+    commit-message:
+      prefix: ci
+    groups:
+      actions:
+        update-types: [minor, patch]

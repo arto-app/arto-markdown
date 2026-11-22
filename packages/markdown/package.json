@@ -14,10 +14,7 @@
     "./syntax-highlighter": "./src/syntax-highlighter.ts",
     "./theme": "./src/theme.ts",
     "./viewport-queue": "./src/viewport-queue.ts",
-    "./style/*": "./style/*",
-    "./build/primer-themes": "./build/primer-themes.ts",
-    "./build/sync-bundle": "./build/sync-bundle.ts",
-    "./build/write-if-changed": "./build/write-if-changed.ts"
+    "./style/*": "./style/*"
   },
   "scripts": {
     "watch": "vite build --mode development --watch --minify false",
