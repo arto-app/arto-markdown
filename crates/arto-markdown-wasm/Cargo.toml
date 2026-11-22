@@ -1,0 +1,24 @@
+[package]
+name = "arto-markdown-wasm"
+description = "arto-markdown for the browser, through WebAssembly"
+# Released inside the npm package @arto-app/markdown (`just wasm-package`),
+# not as a crate: a Rust host depends on arto-markdown itself.
+publish = false
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+arto-markdown = { path = "../arto-markdown" }
+js-sys = "0.3.107"
+serde.workspace = true
+serde-wasm-bindgen = "0.6.5"
+# Pinned exactly: the generated JavaScript has to come from the wasm-bindgen
+# CLI of the same version, which the flake provides (wasm-bindgen-cli_0_2_130).
+wasm-bindgen = "=0.2.130"

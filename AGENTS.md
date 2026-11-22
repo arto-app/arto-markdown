@@ -51,7 +51,8 @@ CI runs the same recipe.
 | Path | What lives there |
 | --- | --- |
 | `crates/arto-markdown/` | The renderer: Markdown → HTML, and (feature `frontend`) the frontend's bundles as Rust strings |
-| `packages/markdown/` | `@arto-app/markdown`: the frontend's TypeScript and CSS, built by Vite into the crate's `assets/frontend/` |
+| `crates/arto-markdown-wasm/` | The renderer for the browser: wasm-bindgen bindings, built into `packages/markdown/wasm/` by `just wasm-package` and published in the npm package, not as a crate |
+| `packages/markdown/` | `@arto-app/markdown`: the frontend's TypeScript and CSS, built by Vite into the crate's `assets/frontend/`; with the WebAssembly renderer when published |
 | `samples/` | Sample documents whose HTML is snapshot-tested |
 | `docs/` | concept, ADRs, and specs |
 | `scripts/` | Release stamp and documentation checks the recipes run |
@@ -89,6 +90,7 @@ The history carried over from Arto keeps its own references:
 | Scope | Covers |
 | --- | --- |
 | `markdown` | `crates/arto-markdown/` |
+| `wasm` | `crates/arto-markdown-wasm/` |
 | `frontend` | `packages/markdown/`, `crates/arto-markdown/src/frontend.rs` |
 | `samples` | `samples/` |
 | `docs` | `README.md`, `LICENSE`, `docs/concept.md` |

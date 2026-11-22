@@ -29,8 +29,17 @@ arto-markdown = "0.48"
 arto-markdown = { version = "0.48", features = ["frontend"] }
 ```
 
-The frontend's sources are the npm package `@arto-app/markdown`, for a host
-that bundles them itself.
+The npm package `@arto-app/markdown` carries the frontend's sources, for a
+host that bundles them itself, and the renderer built for the browser:
+
+```ts
+import init, { render } from "@arto-app/markdown/wasm";
+
+await init();
+const { html, libraries } = render("# Hello\n", "/docs/hello.md");
+// `libraries` names the bundles under `@arto-app/markdown/bundles/` that
+// `manifest.json` there lists, in the order to load them.
+```
 
 `arto-frontend`, the crate the bundles were published in before, stays at
 0.47.1 and is not released any more; depend on `arto-markdown` with the

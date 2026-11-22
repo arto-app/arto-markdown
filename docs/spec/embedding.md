@@ -27,7 +27,26 @@ renderer:
   runtime runs inside an HTML embed's frame, with `draws_html_embed`, which
   says whether a fragment has one.
 - As files, for a host that loads them from its own package rather than
-  compiling them in, described by the manifest below.
+  compiling them in, described by the manifest below. The crate's package
+  carries them, and so does the npm package `@arto-app/markdown`, under
+  `@arto-app/markdown/bundles/`.
+
+## In a browser
+
+`@arto-app/markdown/wasm` is the renderer built for the browser. Once its
+default export has loaded the WebAssembly, `render`, `renderWithToc`,
+`renderDetached` and `renderPreview` render as the crate's functions of the
+same names do, to the same HTML. Each takes the Markdown, the path the
+document is rendered at, the options as `config.json` names them, and the
+files the document names. It returns the HTML with the headings, the images
+left to the host, the reading profile and the libraries the HTML needs, by
+their manifest names. A document the parser gives up on throws.
+
+The files are an object with `stat` and `read`, answering for the paths the
+host renders documents at as `Files` does. Without one, no file a document
+names exists: a link to another document is marked missing and a local image
+is not drawn. Images are inlined unless the options name the URL the host
+serves them under.
 
 The library bundles are the ones `arto page` and Quick Look embed.
 `arto-frontend`, the crate they were published in before, hands a host the
