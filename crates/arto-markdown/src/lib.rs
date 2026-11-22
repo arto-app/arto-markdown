@@ -226,6 +226,7 @@ pub mod frontend;
 mod frontmatter;
 mod headings;
 mod images;
+mod libraries;
 mod line_endings;
 mod links;
 mod options;
@@ -242,6 +243,7 @@ pub use error::*;
 pub use files::*;
 pub use headings::*;
 pub use images::*;
+pub use libraries::*;
 pub use links::*;
 pub use options::*;
 pub use reading::*;
@@ -328,6 +330,9 @@ pub struct RenderResult {
     /// What the document asks a reader to read, one entry per top-level
     /// block (see [`ReadingProfile`]). The frontmatter is not read.
     pub reading: ReadingProfile,
+    /// The frontend's library bundles the HTML needs, read off the HTML as
+    /// it was returned (see [`Libraries::for_fragment`]).
+    pub libraries: Libraries,
 }
 
 /// Render Markdown to HTML.
@@ -458,6 +463,7 @@ impl<'a> Renderer<'a> {
     ) -> Result<RenderResult, RenderError> {
         let mut rendered = self.render(markdown.as_ref(), base_path.as_ref(), options, false)?;
         rendered.html = detach(&rendered.html, deferred_base_url(options));
+        rendered.libraries = Libraries::for_fragment(&rendered.html);
         Ok(rendered)
     }
 
@@ -476,6 +482,7 @@ impl<'a> Renderer<'a> {
         let mut rendered = self.render(markdown.as_ref(), base_path, &options, true)?;
         let html = detach(&rendered.html, deferred_base_url(&options));
         rendered.html = rebase_document_links(&html, base_path);
+        rendered.libraries = Libraries::for_fragment(&rendered.html);
         Ok(rendered)
     }
 
@@ -539,8 +546,10 @@ fn render(
         }
     };
 
+    let html = prepend_frontmatter(&pipeline.frontmatter_html, html_output);
     Ok(RenderResult {
-        html: prepend_frontmatter(&pipeline.frontmatter_html, html_output),
+        libraries: Libraries::for_fragment(&html),
+        html,
         headings: pipeline.headings,
         images,
         reading: pipeline.reading,

@@ -9,8 +9,7 @@ import { FRAME_SCRIPT } from "./src/html-embed-frame.ts";
 
 /**
  * The renderer crate's `frontend` feature hands a host the runtime and the
- * stylesheet for a document in someone else's page, and every consumer the
- * library bundles and the manifests that choose among them.
+ * stylesheet for a document in someone else's page, and the library bundles.
  */
 const bundleConsumers: BundleConsumer[] = [
   {
@@ -21,9 +20,7 @@ const bundleConsumers: BundleConsumer[] = [
       "page-mermaid.iife.js",
       "page-math.iife.js",
       "page-hljs-common.iife.js",
-      "page-hljs-common.txt",
       "page-hljs-all.iife.js",
-      "page-hljs-all.txt",
       "html-embed-frame.js",
     ],
   },
@@ -51,11 +48,13 @@ const pageLibraries = [
 /**
  * Write down the languages a highlight.js bundle answers to, beside it.
  *
- * `arto_markdown::frontend` reads the body it is given to choose between the two builds,
+ * `arto_markdown::Libraries` reads the body it is given to choose between the two builds,
  * and the choice is only as good as its idea of what is in them — a name
  * hard-coded on the Rust side would go quietly wrong on the next highlight.js
  * release. So the list is build output, like the bundle it describes, and the
- * aliases are in it because a fence saying `sh` is asking for `bash`.
+ * aliases are in it because a fence saying `sh` is asking for `bash`. The crate
+ * keeps a copy in its sources (`just languages` refreshes it), so that it can
+ * choose without the bundles.
  */
 function hljsManifestPlugin(
   environment: string,
